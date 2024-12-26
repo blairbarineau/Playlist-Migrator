@@ -15,9 +15,20 @@ def create_spotify_client():
 
 def get_user_playlists(spotify):
     """Fetch all playlists from the authenticated user"""
-    results = spotify.current_user_playlists()
-    for item in results['items']:
+    playlists = []
+    results = spotify.current_user_playlists(limit=50)  # Get first 50 playlists
+    
+    while results:
+        playlists.extend(results['items'])
+        if results['next']:
+            results = spotify.next(results)
+        else:
+            break
+            
+    for item in playlists:
         print(f"Playlist: {item['name']}")
+    
+    return playlists   
         
 def get_playlist_tracks(spotify, playlist_id: str):
     """Fetch all tracks from a specific playlist with their details"""

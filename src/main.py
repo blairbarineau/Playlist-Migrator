@@ -1,25 +1,46 @@
 # src/main.py
-from spotify_client import create_spotify_client, get_playlist_tracks
+from spotify_client import create_spotify_client, get_playlist_tracks, get_user_playlists
 from tidal_client import create_tidal_client, create_playlist, search_track, test_tidal_search
 import time
+
 def display_all_playlists(spotify):
     """Display all available Spotify playlists"""
-    playlists = spotify.current_user_playlists()['items']
     print("\nYour Spotify playlists:")
     print("----------------------")
-    for playlist in playlists:
-        print(f"- {playlist['name']} ({playlist['tracks']['total']} tracks)")
+    playlists = spotify.current_user_playlists()
+    all_playlists = []
+    
+    while playlists:
+        for playlist in playlists['items']:
+            print(f"- {playlist['name']} ({playlist['tracks']['total']} tracks)")
+            all_playlists.append(playlist)
+        if playlists['next']:
+            playlists = spotify.next(playlists)
+        else:
+            break
+            
     print("----------------------")
-    return playlists
+    return all_playlists
 
 def find_playlist_by_name(spotify, name):
     """Find a playlist that matches the given name"""
-    playlists = spotify.current_user_playlists()['items']
+    playlists = get_user_playlists(spotify)  # Use the same function that shows all playlists
+    search_name = name.strip().lower()
+    
+    # First try exact match
     for playlist in playlists:
-        if playlist['name'].lower() == name.lower():
+        if playlist['name'].strip().lower() == search_name:
             return playlist
+    
+    # Then try partial match
+    for playlist in playlists:
+        if search_name in playlist['name'].strip().lower():
+            print(f"\nFound similar playlist: '{playlist['name']}'")
+            confirmation = input("Is this the playlist you want? (y/n): ").lower()
+            if confirmation == 'y':
+                return playlist
+    
     return None
-
 
 def migrate_playlist(spotify_tracks, tidal_session, playlist_name):
     """Migrate tracks from Spotify to Tidal"""
