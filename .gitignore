@@ -5,5 +5,5 @@ __pycache__/
 config/settings.py
 config/tidal_token.json
 
-
+settings.py
 config/settings.py
