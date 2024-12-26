@@ -1,0 +1,9 @@
+venv/
+__pycache__/
+*.pyc
+.env
+config/settings.py
+config/tidal_token.json
+
+
+config/settings.py
